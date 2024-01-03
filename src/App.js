@@ -1,18 +1,22 @@
-import { useState } from 'react'
+// App.js
+import React, { useState } from 'react'
+import { Link, Route, Routes } from 'react-router-dom'
 import './App.css'
+import NotFound from './NotFound'
+import TaskDetails from './TaskDetails'
 import {
 	useRequestAddTodo,
 	useRequestDeleteTodo,
-	useRequestGetTodo,
+	useRequestGetTodos,
 	useRequestUpdateTodo,
 } from './hooks'
 
-function App() {
+export const App = () => {
 	const [refreshTodosFlag, setRefreshTodosFlag] = useState(false)
 
 	const refreshTodos = () => setRefreshTodosFlag(!refreshTodosFlag)
 
-	const { isLoading, todos } = useRequestGetTodo(refreshTodosFlag)
+	const { isLoading, todos } = useRequestGetTodos(refreshTodosFlag)
 	const { isCreating, requestAddTodo } = useRequestAddTodo(refreshTodos)
 	const { isUpdating, requestUpdateTodo } = useRequestUpdateTodo(refreshTodos)
 	const { isDeleting, requestDeleteTodo } = useRequestDeleteTodo(refreshTodos)
@@ -24,35 +28,50 @@ function App() {
 				<div className='loader'></div>
 			) : (
 				<>
-					<ul className='list-group'>
-						{todos.map(({ id, title }) => (
-							<li key={id} className='list-group-item'>
-								{title}
-							</li>
-						))}
-					</ul>
+					<Routes>
+						<Route
+							path='/'
+							element={
+								<>
+									<ul className='list-group'>
+										{todos.map(({ id, title }) => (
+											<Link
+												key={id}
+												className='list-group-item'
+												to={`/task/${id}`}
+											>
+												{title.length > 30 ? `${title.slice(0, 30)}...` : title}
+											</Link>
+										))}
+									</ul>
 
-					<button
-						disabled={isCreating}
-						className='btn btn-primary m-2'
-						onClick={requestAddTodo}
-					>
-						Добавить задачу
-					</button>
-					<button
-						className='btn btn-primary m-2'
-						disabled={isUpdating}
-						onClick={requestUpdateTodo}
-					>
-						Обновить задачу
-					</button>
-					<button
-						className='btn btn-danger m-2'
-						disabled={isDeleting}
-						onClick={requestDeleteTodo}
-					>
-						Удалить задачу
-					</button>
+									<button
+										disabled={isCreating}
+										className='btn btn-primary m-2'
+										onClick={requestAddTodo}
+									>
+										Добавить задачу
+									</button>
+									<button
+										className='btn btn-primary m-2'
+										disabled={isUpdating}
+										onClick={requestUpdateTodo}
+									>
+										Обновить задачу
+									</button>
+									<button
+										className='btn btn-danger m-2'
+										disabled={isDeleting}
+										onClick={requestDeleteTodo}
+									>
+										Удалить задачу
+									</button>
+								</>
+							}
+						/>
+						<Route path='/task/:id' element={<TaskDetails />} />
+						<Route path='*' element={<NotFound />} />
+					</Routes>
 				</>
 			)}
 		</div>
